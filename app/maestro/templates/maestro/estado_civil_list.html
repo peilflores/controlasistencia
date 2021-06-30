@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block css %}
+
+<link href="{% static "assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" %}" rel="stylesheet" />
+
+<link href="{% static "assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" %}" rel="stylesheet" />
+
+<link href="{% static "assets/plugins/switchery/switchery.css" %}" rel="stylesheet">
+
+<link href="{% static "assets/plugins/select2/dist/css/select2.min.css" %}" rel="stylesheet">
+    
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-12 col-lg-12">
+            <div class="panel panel-inverse">
+                <div class="panel-heading">
+                    
+                        <div class="pull-right">
+                            <a href="{% url 'maestro:estado_civil_crear' %}" class="btn btn-sm btn-primary">Crear</a>
+                             
+                        </div>
+                        
+                    
+                    <h4 class="panel-title">Lista Estado Civil</h4>
+
+                </div>
+                <div class="panel-body">
+
+                        <div class="table-responsive">
+                            <table class="table table-condensed table-bordered table-hover dataTables-example" style="width:100%">
+                                <thead>
+                                    <tr>
+
+                                        <th>#</th>
+                                        <th>Descripcion</th>
+                                        <th>Abreviado</th>
+                                        <th>Accion</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   {% for e in estado_civil %}
+                                   <tr class="gradeX">
+
+                                    <td>{{e.id }}</td>
+                                    <td>{{e.descripcion}}</td>
+                                    <td>{{e.abreviado}}</td>
+                                    <td class="center">
+                                        <a class="btn btn-xs btn-primary" href="{% url 'maestro:estado_civil_update' e.id %}" title="Editar"><i class="fas fa-lg fa-edit"></i></a>
+                                           
+                                    </td>
+
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+    </div>
+
+<div id="modal-dialog" class="modal fade" role="dialog">
+
+</div>
+    
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static "assets/plugins/DataTables/media/js/jquery.dataTables.js" %}"></script>
+<script src="{% static "assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js" %}"></script>
+<script src="{% static "assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js" %}"></script>
+
+
+
+<script>
+   $(document).ready(function(){
+    $('.dataTables-example').DataTable();
+      
+    });
+</script>
+{% endblock scripts %}

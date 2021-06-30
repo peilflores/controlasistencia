@@ -1,0 +1,1457 @@
+
+
+function cliente_valadmision(){
+	var documento = document.getElementById('documento').value;
+	var data = []
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if(this.readyState == 4 && this.status == 200){
+			data = JSON.parse(xhr.responseText);
+			if(data.data['admisionpaciente'][1]==0){
+				cliente_validacion();
+				llena_dataTable();
+			}else {
+				llenarcliente_admision(data);
+				llena_dataTable();
+
+			}
+		}
+	};
+	limpiarcliente();
+	xhr.open("GET",'/admision/admisionpaciente/'+documento,false);
+	xhr.send();
+}
+
+function cliente_valadmisioncita(){
+	var documento = document.getElementById('documento').value;
+	var data = []
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange=function(){
+		if(this.readyState == 4 && this.status == 200){
+			// $("#crear_historia").hide()
+			data = JSON.parse(xhr.responseText);
+			console.log(data.length)
+			if(data.data['admisionpaciente'][1]==0){
+				cliente_valcita();
+			}else {
+
+				clienteadmision(data);
+			}
+		}
+	};
+
+	limpiarcliente();
+	xhr.open("GET",'/admision/admisionpaciente/'+documento,false);
+	xhr.send();
+}
+
+function clienteadmision(data){
+	$("#cuposervicio_id").hide();
+	$("#citapaciente_id").hide();
+	$("#pacienteval_id").hide();
+	$("#citaasignada_id").html('');
+	$("#datosgenerales_id").html('');
+	$.each(data.data['admisionpaciente'], function (key, val) {
+		$("#datosgenerales_id").append("<label class='col-form-label'>Paciente: </label>"+
+			"<label class='col-form-label text-danger'>"+val['paciente']+"</label>"+
+			"<label class='col-form-label'>Edad: </label>"+
+			"<label class='col-form-label text-danger'>"+calcularEdad(val['fechanacimiento'])+'-Años'+"</label>");
+		$("#citaasignada_id").append("<span class='btn btn-primary btn-sm text-white'>"+val['fechaingreso']+
+			"</span><span class='btn btn-danger btn-sm text-white'>Atendiendose</span>"+
+			"</span><a href='/cita/lista_cupos/'><span class='btn btn-primary btn-sm text-white'>Volver</span></a>");
+	});
+}
+
+
+function clientecita(data){
+	$("#cuposervicio_id").hide();
+	$("#citapaciente_id").hide();
+	$("#pacienteval_id").hide();
+	$("#citaasignada_id").html('');
+	$("#datosgenerales_id").html('');
+	$.each(data.data['cupoasignado'], function (key, val) {
+		$("#datosgenerales_id").append("<label class='col-form-label'>Paciente: </label>"+
+			"<label class='col-form-label text-danger'>"+val['apepaterno']+' '+val['apematerno']+' '+val['nombres']+"</label>"+
+			"<label class='col-form-label'>Edad: </label>"+
+			"<label class='col-form-label text-danger'>"+calcularEdad(val['fecha_nacimiento'])+'-Años'+"</label>");
+		$("#citaasignada_id").append("<span><a class='btn btn-primary btn-sm text-white'>"+val['fechacita']+"</a>"+
+			"</span><span><a class='btn btn-danger btn-sm text-white'>Con cita</a></span>");
+	});
+}
+
+function cliente_valcita(){
+	var documento = document.getElementById('documento').value;
+	var data = []
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange=function(){
+		if(this.readyState == 4 && this.status == 200){
+			// $("#crear_historia").hide()
+			data = JSON.parse(xhr.responseText);
+			if(data.data['cupoasignado'][1]!=0){
+				clientecita(data);
+			}else {
+
+				clientebd();
+			}
+		}
+	};
+
+	limpiarcliente();
+	xhr.open("GET",'/cita/validarcupocliente/'+documento,false);
+	xhr.send();
+}
+
+function clientecita(data){
+	$("#cuposervicio_id").hide();
+	$("#citapaciente_id").hide();
+	$("#pacienteval_id").hide();
+	$("#citaasignada_id").html('');
+	$("#datosgenerales_id").html('');
+	$.each(data.data['cupoasignado'], function (key, val) {
+		$("#datosgenerales_id").append("<label class='col-form-label'>Paciente: </label>"+
+			"<label class='col-form-label text-danger'>"+val['apepaterno']+' '+val['apematerno']+' '+val['nombres']+"</label>"+
+			"<label class='col-form-label'>Edad: </label>"+
+			"<label class='col-form-label text-danger'>"+calcularEdad(val['fecha_nacimiento'])+'-Años'+"</label>");
+		$("#citaasignada_id").append("<span><a class='btn btn-primary btn-sm text-white'>"+val['fechacita']+"</a>"+
+			"</span><span><a class='btn btn-danger btn-sm text-white'>Con cita</a></span>");
+	});
+}
+
+function clienteapi(){
+	documento = recuperadocumento();
+	datos='';
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange=function(){
+		if(this.readyState == 4 && this.status == 200){
+
+			data = JSON.parse(xhr.responseText);
+			datos = data;
+
+
+			asignarcupo(data);
+
+		}
+	};
+
+	xhr.open("GET",'/configuracion/api/cliente/'+this.documento,false);
+	xhr.send();
+	return datos;
+}
+
+function clientebd(){
+	$("#cuposervicio_id").show();
+	$("#citapaciente_id").show();
+	$("#pacienteval_id").show();
+	documento = $("#documento").val();
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange=function(){
+		if(this.readyState == 4 && this.status == 200){
+
+
+			data = JSON.parse(xhr.responseText);
+			console.log(data);
+
+			datos = JSON.stringify(data);
+			if(datos.length > 1){
+
+				llenarclientebd(data);
+				modalcliente();
+
+			}
+		}else if (this.readyState == 4 && this.status == 404){
+			buscarreniec();
+			modalcliente();
+		}
+	};
+
+	xhr.open("GET",'/configuracion/api/cliente/'+this.documento,false);
+	xhr.send();
+}
+
+function llenarclientebd(data){
+	$("#datosgenerales_id").html('');
+	$("#citaasignada_id").html('');
+	$("#datosgenerales_id").append("<label class='col-form-label'>Paciente: </label>"+
+		"<label class='col-form-label text-danger'>"+data.apepaterno+' '+data.apematerno+' '+data.nombres+"</label>"+
+		"<label class='col-form-label'>Edad: </label>"+
+		"<label class='col-form-label text-danger'>"+calcularEdad(data.fecha_nacimiento)+'-Años'+"</label>");
+	$("#citaasignada_id").append("<span><a class='btn btn-danger btn-sm text-white'>Sin cita</a></span>");
+}
+function modalcliente() {
+	dni = $("#documento").val()
+	url = '/admision/clientebasico/'+dni;
+    $('#modal-dialog').load(url, function()
+    {
+        $(this).modal('show');
+    });
+    return false;
+}
+function clientereniec(data){
+	$("#datosgenerales_id").html('');
+	$("#citaasignada_id").html('');
+	$("#datosgenerales_id").append("<label class='col-form-label'>Paciente: </label>"+
+		"<label class='col-form-label text-danger'>"+data.apepaterno+' '+data.apematerno+' '+data.nombres+"</label>"+
+		"<label class='col-form-label'>Edad: </label>"+
+		"<label class='col-form-label text-danger'>"+calcularEdad(data.fechanacimiento)+'-Años'+"</label>");
+	$("#citaasignada_id").append("<span><a class='btn btn-danger btn-sm text-white'>Sin cita</a></span>");
+}
+
+
+
+///validacion desde admiasion buscar paciente
+function cliente_validacion(){
+	var documento = document.getElementById('documento').value;
+	var data = []
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange=function(){
+		if(this.readyState == 4 && this.status == 200){
+			// $("#crear_historia").hide()
+			data = JSON.parse(xhr.responseText);
+			if(data.data['cupoasignado'][1]!=0){
+				llenar_tabla_cupo(data);
+			}else {
+
+				validar_cliente();
+
+			}
+		}
+	};
+
+	limpiarcliente();
+	xhr.open("GET",'/cita/validarcupocliente/'+documento,false);
+	xhr.send();
+}
+
+function validar_cliente(){
+	var documento = document.getElementById('documento').value;
+	var data = []
+	var xhr = new XMLHttpRequest();
+	xhr.onreadystatechange=function(){
+		if(this.readyState == 4 && this.status == 200){
+
+			data = JSON.parse(xhr.responseText);
+			console.log(data)
+			if(data.length==0){
+				console.log("buscar registro en reniec")
+				validar_reniec(documento);
+			}else{
+				llenar_tabla_cliente_cita(data,3);
+				console.log("validar en citas");
+			}
+		}
+	};
+	xhr.open("GET",'/admision/validarcliente/'+documento,false);
+	xhr.send();
+}
+
+function llenarcliente_admision(data){
+	eliminartabla('cuerpocliente');
+
+	$('#datocliente').show()
+	$.each(data.data['admisionpaciente'], function (key, val) {
+
+		docu = $('#documento').val();
+		var table = document.getElementById("detallecliente").getElementsByTagName('tbody')[0];
+		var rowCount = table.rows.length
+		var row = table.insertRow(rowCount);
+
+		var cell1 = row.insertCell(0);
+	    var cell2 = row.insertCell(1);
+	    var cell3 = row.insertCell(2);
+	    var cell4 = row.insertCell(3);
+	    var cell5 = row.insertCell(4);
+
+	    cell1.innerHTML = 'D.N.I';
+	    cell2.innerHTML = docu;
+	    cell3.innerHTML = val['paciente'];
+		cell4.innerHTML = calcularEdad(val['fechanacimiento']);
+		if (val['estado'] == '1'){
+			cell5.innerHTML = '<span><a class="btn btn-success btn-sm text-white">'+val['fechaingreso']+'</a></span>'+'<span><a class="btn btn-danger btn-sm text-white">Aun Falta Pagar</a></span>';
+		}else if (val['estado'] == '2'){
+			cell5.innerHTML = '<span><a class="btn btn-primary btn-sm text-white">'+val['fechaingreso']+'</a></span>'+'<span><a class="btn btn-danger btn-sm text-white">Aserquese al Consultorio</a></span>';
+		}
+	});
+}
+
+function llenar_tabla_cupo(data){
+	eliminartabla('cuerpocliente');
+
+	$('#datocliente').show()
+	$.each(data.data['cupoasignado'], function (key, val) {
+
+		docu = $('#documento').val();
+		var table = document.getElementById("detallecliente").getElementsByTagName('tbody')[0];
+		var rowCount = table.rows.length
+		var row = table.insertRow(rowCount);
+
+		var cell1 = row.insertCell(0);
+	    var cell2 = row.insertCell(1);
+	    var cell3 = row.insertCell(2);
+	    var cell4 = row.insertCell(3);
+	    var cell5 = row.insertCell(4);
+	    var cell6 = row.insertCell(5);
+
+	    cell1.innerHTML = 'D.N.I';
+	    cell2.innerHTML = docu;
+	    cell3.innerHTML = val['apepaterno']+' '+val['apematerno']+' '+val['nombres'];
+		cell4.innerHTML = calcularEdad(val['fecha_nacimiento']);
+
+
+		if (val['estado'] == 'parahoy'){
+			if(data.data['permiso'] == 'admision'){
+
+				if(val['estadocita'] ==4){
+
+					cell5.innerHTML = '<span  class="label label-danger">Pendiente</a></span>';
+					
+					cell6.innerHTML = ' <button type="button" onclick="detail_abrirmodal('+val['id_detallecupo']+')" class="btn  btn-xs btn-green detailcita"><i class="fas fa-eye"></i></button> <button class="btn btn-xs atencion btn-primary" disabled=""><i class="fas fa-lg  fa-file-alt"></i></button>'
+
+					atender();
+
+
+				}else if(val['estadocita'] ==5){
+
+					cell5.innerHTML = '<span  class="label label-warning">POR ATENDER</a></span>';
+					
+					cell6.innerHTML = ' <button type="button" onclick="detail_abrirmodal('+val['id_detallecupo']+')" class="btn  btn-xs btn-green detailcita"><i class="fas fa-eye"></i></button> <button class="btn btn-xs atencion btn-primary"><i class="fas fa-lg  fa-file-alt"></i></button>'
+					atender();
+				}else if(val['estadocita'] ==1){
+
+					cell5.innerHTML = '<span  class="label label-danger">ATENDIDO</a></span>';
+					
+					cell6.innerHTML = ' <button type="button" onclick="detail_abrirmodal('+val['id_detallecupo']+')" class="btn  btn-xs btn-green detailcita"><i class="fas fa-eye"></i></button> <button class="btn btn-xs atencion btn-primary" disabled=""><i class="fas fa-lg  fa-file-alt"></i></button>'
+					atender();
+
+
+				}
+				
+				
+
+
+			}else if (data.data['permiso'] == 'cita'){
+				cell5.innerHTML = '<span><a class="btn btn-primary btn-sm text-white">'+val['fechacita']+'</a></span>'+'<span><a class="btn btn-success btn-sm text-white">Tiene Cita Hoy</a></span>';
+			}
+
+		}else if (val['estado'] == 'paraotrodia'){
+
+			if(val['estadocita'] ==4){
+
+					cell5.innerHTML = '<span  class="label label-danger">Pendiente</a></span>';
+					
+					cell6.innerHTML = ' <button type="button" onclick="detail_abrirmodal('+val['id_detallecupo']+')" class="btn  btn-xs btn-green detailcita"><i class="fas fa-eye"></i></button> <button class="btn btn-xs atencion btn-primary" disabled=""><i class="fas fa-lg  fa-file-alt"></i></button>'
+
+					atender();
+
+
+				}else if(val['estadocita'] ==5){
+
+					cell5.innerHTML = '<span  class="label label-warning">POR ATENDER</a></span>';
+					
+					cell6.innerHTML = ' <button type="button" onclick="detail_abrirmodal('+val['id_detallecupo']+')" class="btn  btn-xs btn-green detailcita"><i class="fas fa-eye"></i></button> &nbsp;&nbsp;&nbsp;<a href="/configuracion/actualizar_cliente/'+val['idcliente']+'" class="btn btn-xs  atencion btn-primary"><i class="fas fa-lg  fa-file-alt"></i></button>'
+					
+				}else if(val['estadocita'] ==1){
+
+					cell5.innerHTML = '<span  class="label label-success">ATENDIDO</a></span>';
+					
+					cell6.innerHTML = ' <button type="button" onclick="detail_abrirmodal('+val['id_detallecupo']+')" class="btn  btn-xs btn-green detailcita"><i class="fas fa-eye"></i></button> <button class="btn btn-xs atencion btn-primary" disabled=""><i class="fas fa-lg  fa-file-alt"></i></button>'
+					atender();
+
+
+				}
+
+		}
+	});
+
+
+	$('.dataTables-example tbody').on( 'click', 'button.detailcita', function () {
+
+	  		var fila = tabla.row( $(this).parents('tr') ).data();
+
+	  		location.href="/emergencia/admision_emergencia/"+fila['id']+"";
+
+        });
+}
+
+function validar_reniec(numero)
+{
+	var url = 'http://181.176.210.204:81/bldubigeo/api/ubigeo/dnis/'+numero+'/';
+		$.ajax({
+		async:false,
+		url:url,
+		type:'GET',
+
+		success: function(data){
+			console.log("hay datos reniec")
+			llenar_tabla_reniec(data,1);
+		},
+		error: function(data){
+			console.log("soy error")
+			llenar_tabla_reniec(data,2);
+
+		}
+	});
+}
+
+function buscarreniec(){
+	tipodoc = $("#tipodocu_id").val();
+	if (tipodoc == undefined){
+		tipodoc = $("#tipodocumento_id").val();
+	}else{
+		tipodoc = tipodoc
+	}
+	console.log(tipodoc)
+	ok=0
+	docu = $('#documento').val();
+	if (docu.length==8 && tipodoc == '1')
+	{
+		url = "http://181.176.210.204:81/bldubigeo/api/ubigeo/dnis/"+docu+'/';
+		ok=1
+	}
+	if (ok == 1){
+		$.ajax({
+			url:url,
+			type:'GET',
+			success:function(data){
+				clientereniec(data);
+
+				if (data.personafallecida=='A'){
+					$("#guardar_id").hide()
+					$("#personafallecida_id").val("PERSONA FALLECIDA")
+					$("#divpersonafallecida_id").show()
+				}
+				$("#apepaterno_id").val(data.apepaterno)
+				$("#apematerno_id").val(data.apematerno)
+				$("#nombres_id").val(data.nombre)
+				$("#nuevapersona_id").hide();
+			},error: function(data){
+			console.log("soy error")
+		}
+		});
+	}
+}
+
+function llenar_tabla_reniec(data,existe){
+	eliminartabla('cuerpocliente');
+	$("#datocliente").show();
+	$("#numerodocdni_id").val("data.apematerno")
+	$('#id_cliente').val(data.id);
+
+	docu = $('#documento').val();
+	var table = document.getElementById("detallecliente").getElementsByTagName('tbody')[0];
+	var rowCount = table.rows.length
+	var row = table.insertRow(rowCount);
+
+	var cell1 = row.insertCell(0);
+	var cell2 = row.insertCell(1);
+	var cell3 = row.insertCell(2);
+	var cell4 = row.insertCell(3);
+	var cell5 = row.insertCell(4);
+
+
+	cell1.innerHTML = 'D.N.I';
+	cell2.innerHTML = $('#documento').val();
+	cell3.innerHTML = data.nombre+'  '+data.apepaterno+'  '+data.apematerno;
+	cell4.innerHTML = calcularEdad(data.fecha_nacimiento);
+	if(existe==1){
+
+	cell5.innerHTML='<span><a class="btn btn-success btn-sm text-white" href="/configuracion/crear_cliente?documento='+data.dni+'&nombre='+data.nombre+'&apepaterno='+data.apepaterno+'&apematerno='+data.apematerno+'">Crear Historia</a></span>';
+	}
+}
+
+function guardarcliente(token){
+	token=token
+	url = '/configuracion/api/clienteguardar/'
+	data = {
+		'csrfmiddlewaretoken':token,
+	    "nombres": $("#nombres_id").val(),
+	    "apepaterno": $("#apepaterno_id").val(),
+	    "apematerno": $("#apematerno_id").val(),
+	    "fecha_nacimiento": $("#fechanacimiento_id").val(),
+	    "sexo": $("#sexo_id").val(),
+	    "direccion": $("#direccion_id").val(),
+	    "telefono": $("#telefono_id").val(),
+	    "historia_clinica": $("#numerodoc_id").val(),
+	    "tipo_documento": $("#tipodocu_id").val(),
+	    "numero_documento": $("#numerodoc_id").val(),
+	    "lugar_residencia": $("#lugar_residencia").val(),
+	    "lugar_nacimiento": $("#lugarnacimiento_id").val(),
+	    "nombre_madre": $("#nombremadre_id").val(),
+	    "nombre_padre": $("#nombrepadre_id").val(),
+	    "estadocivil": $("#estadocivil_id").val(),
+	    "grado_instruccion": $("#id_grado_instruccion").val(),
+	    "etnia": $("#etnia_id").val(),
+	}
+	$.ajax({
+		url:url,
+		type:'POST',
+		data:data,
+		success:function(data){
+			// $("#crear_historia").hide()
+			//console.log("Paciente Creado")
+		}
+	});
+}
+
+function actualizarcliente(token){
+	numero = $("#numerodoc_id").val(),
+	token=token
+	url = '/configuracion/api/clienteactualizar/'+ numero;
+	data = {
+	    "nombres": $("#nombres_id").val(),
+	    "apepaterno": $("#apepaterno_id").val(),
+	    "apematerno": $("#apematerno_id").val(),
+	    "fecha_nacimiento": $("#fechanacimiento_id").val(),
+	    "sexo": $("#sexo_id").val(),
+	    "direccion": $("#direccion_id").val(),
+	    "telefono": $("#telefono_id").val(),
+	    "historia_clinica": $("#numerodoc_id").val(),
+	    "tipo_documento": $("#tipodocu_id").val(),
+	    "numero_documento": $("#numerodoc_id").val(),
+	    "lugar_residencia": $("#lugar_residencia").val(),
+	    "lugar_nacimiento": $("#lugarnacimiento_id").val(),
+	    "nombre_madre": $("#nombremadre_id").val(),
+	    "nombre_padre": $("#nombrepadre_id").val(),
+	    "estadocivil": $("#estadocivil_id").val(),
+	    "grado_instruccion": $("#id_grado_instruccion").val(),
+	    "etnia": $("#etnia_id").val(),
+	}
+	$.ajax({
+		url:url,
+		headers:{"X-CSRFToken": token},
+		type:'PUT',
+		data:data,
+		success:function(data){
+
+		}
+	});
+}
+
+function eliminartabla(tabla){
+	var table = document.getElementById(tabla);
+	var rowCount = table.rows.length;
+	for (var i=rowCount-1; i >=0; i--) {
+		table.deleteRow(i);
+	}
+}
+
+
+function seleccionar_servicio(){
+	$("#medicoservicio_id").empty();
+	servicio = $('#servicio_id').val();
+
+	var url = '/cita/listamedicos_cupo/'+servicio;
+	$.ajax({
+		url:url,
+		type:'GET',
+		success:function(data){
+			console.log(data);
+			var combo =$('#medicoservicio_id');
+			combo.append('<option value=""></option>');
+	    	$.each(data.data['medicos'], function (key, val) {
+				combo.append('<option value="' + val['detallerol'] + '">' +val['medico'] +'</option>');
+			});
+
+		}
+	});
+
+}
+
+function consultar(){
+	tipofin = $("#tipofinanciamiento_id").val()
+	console.log(tipofin)
+	ok=0
+	if (tipofin == '1'){
+		$("#darcita_id").hide();
+		$("#atencioncliente_id").hide();
+		$("#numerocaptcha_id").val("");
+		url = "http://181.176.210.204:81/bldubigeo/api/ubigeo/nuevo/"
+		ok=1
+	}
+	else{
+		limpiar();
+		$("#atencioncliente_id").show();
+		$("#darcita_id").show();
+		$("#referencia_id").removeAttr("required");
+		$("#darcita_id").show();
+		$("#imagencaptcha_id").hide();
+		$("#resetcampos_id").show();
+		$("#numerocaptcha_id").hide();
+		$("#botonsis_id").hide();
+		$("#segurisis_id").hide();
+		documento = recuperadocumento();
+		if (documento == null){
+			documento = $("#documento").val();
+			$("#id_numerodocl").val(documento);
+		}
+		$("#tipofin_id").val(tipofin);
+	}
+	if (ok == 1){
+		$.ajax({
+			url:url,
+			type:'GET',
+			success:function(data){
+
+				$("#imagencaptcha_id").show();
+				$('#imagencaptcha_id').html("<img border='0' height='40' src='"+data.urlimagen+"' width='190'/>");
+				$("#numerocaptcha_id").show();
+				$("#botonsis_id").show();
+				$("#estado_id").val(data.estado);
+				$("#validacion_id").val(data.validacion);
+			}
+		});
+	}
+
+}
+
+function abrirmodal(url)
+	{
+		console.log(url)
+		dni = $("#documento").val()
+		url = '/admision/clientebasico/'+dni
+        $('#modal-dialog').load(url, function()
+        {
+            $(this).modal('show');
+        });
+        return false;
+	}
+
+
+function detail_abrirmodal(iddetallecupo)
+	{
+		
+		
+		url = '/cita/detail_cupo/'+iddetallecupo
+        $('#modal-dialog').load(url, function()
+        {
+            $(this).modal('show');
+        });
+        return false;
+	}
+
+
+
+
+
+
+function buscarpaciente(token){
+
+
+	token = token
+	captcha = $('#numerocaptcha_id').val();
+	
+    documento = document.getElementById("id_numero_documento").value;
+    
+    console.log(documento)
+    if (documento == null){
+    	documento = $('#documento').val();
+    	$("#id_numero_documento").val(documento)
+	}
+	tipofin = $("#id_tipofinanciamiento").val()
+
+
+	ok=0
+	if (captcha.length==5 && tipofin == '1')
+	{
+
+		console.log("SI INGRESA")
+		url = "http://181.176.210.204:81/bldubigeo/api/ubigeo/nuevo/"
+		data = {
+			'dni': documento,
+            'estado': $('#estado_id').val(),
+            'validacion': $('#validacion_id').val(),
+            'valorimagen': captcha,
+            'csrfmiddlewaretoken':token,
+		}
+		ok=1
+	}
+	console.log(ok)
+	if (ok == 1){
+
+		$.ajax({
+			url:url,
+			type:'POST',
+			data:data,
+			success:function(data){
+
+				console.log(data)
+				if (data != "Paciente no Registrado en Sis"){
+					$("#segurisis_id").show()
+					if ('{{admision}}'){
+
+					}
+					else{
+						checkboxcupo();
+					}
+					$("#codestablecimiento_id").html(data.codestablecimiento);
+					$("#codestablecimiento1_id").val(data.codestablecimiento);
+					$("#codrenaes_id").val(data.codrenaes);
+					$(".estabsalud_id").html(data.estabsalud);
+					$("#estabsalud1_id").val(data.estabsalud);
+					$("#ubicacionestabsalud_id").html(data.ubicacionestabsalud);
+					$("#planbeneficios_id").val(data.planbeneficios);
+					$("#fechaafiliacion_id").val(data.fechaafiliacion);
+					$("#numeroafiliacion1_id").val(data.numeroafiliacion);
+					$("#numeroafiliacion_id").html(data.numeroafiliacion);
+					$(".estadosis_id").html(data.estado);
+					$("#tiposeguro_id").val(data.tiposeguro);
+					$("#tiposeguro2_id").val(data.tiposeguro2);
+					$("#vigenciahasta_id").val(data.vigenciahasta);
+					if (data.estado == 'ACTIVO') {
+						$("#darcita_id").show();
+						$("#atencioncliente_id").show();
+						$("#referencia_id").show();
+						$("#referencia_id").attr("required");
+					}else if (data.estado == 'ANULADO'){
+
+
+						alert("PACIENTE CON SIS ANULADO")
+						$("#referencia_id").hide();
+						$("#referencia_id").removeAttr("required");
+						$("#referencia_id").attr("readonly");
+						$("#numerocaptcha_id").hide();
+						$("#botonsis_id").hide();
+						$("#imagencaptcha_id").hide();
+						$(".btn-action").attr("disabled", true);
+
+
+					}
+
+
+					else{
+						$("#referencia_id").hide();
+						$("#referencia_id").removeAttr("required");
+						$("#referencia_id").attr("readonly");
+						$("#numerocaptcha_id").hide();
+						$("#botonsis_id").hide();
+						$("#imagencaptcha_id").hide();
+					}
+				}else{
+					alert("Paciente no Registrado en SiS")
+					$("#numerocaptcha_id").hide();
+					$("#botonsis_id").hide();
+					$("#imagencaptcha_id").hide();
+				}
+			}
+		});
+	}
+
+}
+
+function val(token){
+	token = token
+	captcha = $('#numerocaptcha_id').val();
+    documento = $('#id_numero_documento').val();
+
+	tipofin = $("#tipofinanciamiento_id").val()
+	ok=0
+	if ( captcha.length==5 && tipofin == '1')
+	{
+		url = "http://181.176.210.204:81/bldubigeo/api/ubigeo/nuevo"
+		data = {
+			'dni':'41082649',
+            'estado': $('#estado_id').val(),
+            'validacion': $('#validacion_id').val(),
+            'valorimagen': captcha,
+            'csrfmiddlewaretoken':token,
+		}
+		ok=1
+	}
+
+	if (ok == 1){
+		$.ajax({
+			url:url,
+			type:'POST',
+			data:data,
+			success:function(data){
+				//console.log(data);
+				if (data != "Paciente no Registrado en Sis"){
+					$(".estabsalud_id").html(data.estabsalud);
+					$("#estabsalud1_id").val(data.estabsalud);
+					$("#ubicacionestabsalud_id").html(data.ubicacionestabsalud);
+					$("#planbeneficios_id").val(data.planbeneficios);
+					$("#fechaafiliacion_id").val(data.fechaafiliacion);
+
+					$(".estadosis_id").html(data.estado);
+					if (data.estado == 'ACTIVO') {
+						$("#atencioncliente_id").show();
+					}else{
+						$("#numerocaptcha_id").hide();
+						$("#botonsis_id").hide();
+						$("#imagencaptcha_id").hide();
+					}
+				}else{
+					alert("Paciente no Registrado en SiS")
+					$("#numerocaptcha_id").hide();
+					$("#botonsis_id").hide();
+					$("#imagencaptcha_id").hide();
+				}
+			}
+		});
+	}
+
+}
+
+function limpiar(){
+	$("#numerocaptcha_id").html("");
+	$("#codestablecimiento_id").html("");
+	$("#codestablecimiento1_id").val("");
+	$("#codrenaes_id").val("");
+	$(".estabsalud_id").html("");
+	$("#estabsalud1_id").val("");
+	$("#ubicacionestabsalud_id").html("");
+	$("#ubicacionestabsalud1_id").val("");
+	$("#planbeneficios_id").val("");
+	$("#fechaafiliacion_id").val("");
+	$("#numeroafiliacion_id").html("");
+	$("#numeroafiliacion1_id").val("");
+	$(".estadosis_id").val("");
+	$("#tiposeguro_id").val("");
+	$("#tiposeguro2_id").val("");
+	$("#vigenciahasta_id").val("");
+}
+
+function seleccionar_medico(){
+	eliminartabla("tabla-agregar");
+	medico = $('#medicoservicio_id').val();
+	servicio = servicio
+	var url = '/cita/cupos_servicio/'+servicio;
+	$.ajax({
+		url:url,
+		type:'GET',
+		success:function(data){
+			console.log(data.data['detallerolmedico']);
+	    	c = 0
+			$.each(data.data['detallerolmedico'], function (key, val) {
+				if (medico==val['detallerol']) {
+					c = c+1
+					var table = document.getElementById("tabla-agregar");
+				    var rowCount = table.rows.length
+				    var row = table.insertRow(rowCount);
+				    var cell1 = row.insertCell(0);
+				    var cell2 = row.insertCell(1);
+				    var cell3 = row.insertCell(2);
+				    var cell4 = row.insertCell(3);
+				    var cell5 = row.insertCell(4);
+
+				    cell1.innerHTML = c;
+				    cell2.innerHTML = val['fecha'];
+				    cell3.innerHTML = val['turno'];
+				    cell4.innerHTML = val['cupo'];
+
+	                cell5.innerHTML = "<div class='height has-error' data-scrollbar='true'>"+
+									  "<div class='switcher switcher-danger'>"+
+					                  "<input type='radio' name='cupo' onchange='cambioswitch()' value="+val['idcupo']+" id='cssRadio"+c+"'/>" +
+					                  "<label for='cssRadio"+c+"'></label>"+
+					                  "</div></div>";
+				}
+			});
+
+		}
+	});
+
+}
+
+
+function cambioswitch(){
+	if (recuperadocumento() == null){
+		$("#cuposindni_id").show();
+		$("#citapaciente_id").show();
+	}else{
+		$("#cuposindni_id").hide();
+		$("#citapaciente_id").hide();
+	}
+}
+
+$("#formulario" ).submit(function() {
+
+});
+
+function asignarcupo(data){
+	recuperadocumento();
+	$("#id_cliente").val(data.id);
+	$("#cliente_id").html(data.nombres+' '+data.apepaterno+' '+data.apematerno)
+	$("#edad_id").html(calcularEdad(data.fecha_nacimiento))
+	$("#dni_id").html(data.numero_documento)
+	if (data.sexo == '1'){
+		$("#sexo_id").html('MASCULINO')
+	}else if (data.sexo == '2'){
+		$("#sexo_id").html('FEMENINO')
+	}
+	$("#hc_id").html(data.historia_clinica)
+	$("#archivo_id").html(data.cod_archivamiento)
+
+	if (documento != null){
+		$("#cupocondni_id").show();
+		$("#cuposindni_id").hide()
+	}
+	else {
+		$("#cupocondni_id").hide();
+		$("#cuposindni_id").hide();
+	}
+}
+
+function  checkboxcupo() {
+    dato = [];
+    $("input[type=radio]:checked").each(function(){
+    	dato.push({'id':$(this).val()});
+    });
+    if (dato.length == 0){
+    	alert("Debe Seleccionar un Cupo")
+    	location.href="/cita/lista_cupos/"
+    }else{
+    	$("#cupos").val(JSON.stringify(dato));
+
+    }
+}
+
+function atender(){
+	numerodni = $("#documento").val()
+	window.localStorage.setItem('numerodni', numerodni);
+}
+
+function dar_cita(){
+	numerodni = $("#documento").val()
+	window.localStorage.setItem('numerodni', numerodni);
+	location.href="/cita/lista_cupos/"
+}
+
+function recuperadocumento(){
+	dni = window.localStorage.getItem("numerodni");
+ 	$("#id_numerodoc").val(dni)
+ 	return dni
+}
+
+$(document).ready(function() {
+ 	dni = window.localStorage.getItem("numerodni");
+ 	$("#id_numerodoc").val(dni)
+
+});
+
+function limpiarcliente(){
+	window.localStorage.removeItem("numerodni");
+}
+
+function consultarsis(){
+	tipofin = $("#id_tipofinanciamiento").val()
+ 	
+ 	ok=0
+ 	if (tipofin == '1'){
+ 		$("#darcita_id").hide();
+ 		$("#atencioncliente_id").hide();
+ 		url = "http://181.176.210.204:81/bldubigeo/api/ubigeo/nuevo/"
+ 		ok=1
+
+ 		$(".btn-action").attr("disabled", true);
+ 	}
+ 	else{
+ 		limpiarsis();
+ 		$("#atencioncliente_id").show();
+ 		$("#darcita_id").show();
+ 		$("#referencia_id").removeAttr("required");
+ 		$("#darcita_id").show();
+ 		$("#imagencaptcha_id").hide();
+ 		$("#resetcampos_id").show();
+ 		$("#numerocaptcha_id").hide();
+ 		$("#botonsis_id").hide();
+ 		$("#segurisis_id").hide();
+ 		$("#tipofin_id").val(tipofin);
+ 		$(".btn-action").attr("disabled", false);
+ 	}
+
+ 	
+ 	if (ok == 1){
+
+ 		$.ajax({
+ 			url:url,
+ 			type:'GET',
+ 			success:function(data){
+ 				
+ 				$("#imagencaptcha_id").show();
+ 				$('#imagencaptcha_id').html("<img border='0' height='40' src='"+data.urlimagen+"' width='190'/>");
+ 				$("#numerocaptcha_id").show();
+ 				$("#botonsis_id").show();
+ 				$("#estado_id").val(data.estado);
+ 				$("#validacion_id").val(data.validacion);
+ 			}
+ 		});
+ 	}
+
+ }
+  function limpiarsis(){
+ 	$("#codestablecimiento_id").html("");
+ 	$("#codestablecimiento1_id").val("");
+ 	$("#codrenaes_id").val("");
+ 	$(".estabsalud_id").html("");
+ 	$("#estabsalud1_id").val("");
+ 	$("#ubicacionestabsalud_id").html("");
+ 	$("#ubicacionestabsalud1_id").val("");
+ 	$("#planbeneficios_id").val("");
+ 	$("#fechaafiliacion_id").val("");
+ 	$("#numeroafiliacion_id").html("");
+ 	$("#numeroafiliacion1_id").val("");
+ 	$(".estadosis_id").val("");
+ 	$("#tiposeguro_id").val("");
+ 	$("#tiposeguro2_id").val("");
+ 	$("#vigenciahasta_id").val("");
+ }
+
+
+
+/* CODIGO NUEVO DE LISTA DE ADMISION */
+
+
+function llena_dataTable()
+{
+
+	documento=document.getElementById("documento").value;
+	 var tabla = $('.dataTables-example').DataTable({
+	 	"language": {
+                  "url": "/static/assets/plugins/DataTables/language/Spanish.json"
+        },
+
+
+        responsive: true,
+        order: [[ 0, "desc" ]],
+        processing: true,
+        retrieve: true,
+        ajax: "/admision/api/admision/"+documento,
+        dataSrc: "data",
+        search : "Búsqueda",
+
+
+
+        columns: [
+	        {data:'id' },
+	        {
+	        	data:   "servicio",
+	        	render: function ( data, type, row ) {
+	        		if ( data === '1' ) {
+	        			return 'CONSULTA EXTERNA';
+	        		}
+	        		if ( data === '2' ) {
+	        			return 'EMERGENCIA';
+	        		}
+	        		if ( data === '3' ) {
+	        			return 'HOSPITALIZACION';
+	        		}
+
+	        		return data;
+	        		},
+	        		className: "dt-body-center"
+	        },
+	        { data: 'consultorio'},
+	        { data: 'medico'},
+	        { data: 'fecha_atencion'},
+	        {
+	        	data:   "estado",
+	        	render: function ( data, type, row ) {
+	        		if ( data === '1' ) {
+	        			return '<span class="label label-danger">PENDIENTE</span>';
+	        		}
+	        		if ( data === '2' ) {
+	        			return '<span class="label label-warning">ADMITIDO</span>';
+	        		}
+	        		if ( data === '3' ) {
+	        			return '<span class="label label-danger">CANCELADO</span>';
+	        		}
+	        		if ( data === '4' ) {
+	        			return '<span class="label label-success">ATENDIDO</span>';
+	        		}
+					if ( data === '5' ) {
+	        			return '<span class="label label-info">PENDIENTE DE ATENCION</span>';
+	        		}
+
+	        		return data;
+	        		},
+	        		className: "dt-body-center"
+	        },
+
+	        {
+	        	data:   "estado",
+
+	        	render: function ( data, type, row ) {
+	        		if ( data === '1' ) {
+	        			return ' <button class="btn  btn-xs btn-green btncalificar"><i class="fas fa-eye"></i></button> <button class="btn btn-xs atencion btn-danger btneliminar"><i class="fa fa-times-circle"></i></button>';
+	        		}if ( data === '2' ) {
+	        			return ' <button class="btn  btn-xs btn-green btncalificar"><i class="fas fa-eye"></i></button> <button class="btn btn-xs atencion btn-danger btneliminar"><i class="fa fa-times-circle"></i></button>';
+	        		}
+								return ' <button class="btn  btn-xs btn-green btncalificar"><i class="fas fa-eye"></i></button> <button class="btn btn-xs atencion btn-danger btneliminar"><i class="fa fa-times-circle"></i></button>';
+
+
+
+
+
+
+	        		/*return '';*/
+	        		},
+	        		className: "dt-body-center"
+	        },
+
+
+	        ],
+
+	 });
+
+
+	  $('.dataTables-example tbody').on( 'click', 'button.btncalificar', function () {
+
+	  		var fila = tabla.row( $(this).parents('tr') ).data();
+
+	  		location.href="/emergencia/admision_emergencia/"+fila['id']+"";
+
+        });
+
+	 
+
+}
+
+
+
+/*  CODIGO NUEVO TRAIDO DESDE RAYOSX.JS */
+
+function llenar_tabla_cliente_cita(data,existe){
+
+		limpiar_tabla('cuerpocliente');
+		$("#datocliente").show();
+		for(var i=0;i<data.length;i++){
+
+		//$('#id_cliente').val(data[i].pk);
+			lista_cliente.push({'id':data[i].pk})
+		docu = $('#documento').val();
+		var table = document.getElementById("detallecliente").getElementsByTagName('tbody')[0];
+		var rowCount = table.rows.length
+		var row = table.insertRow(rowCount);
+
+		var cell1 = row.insertCell(0);
+	    var cell2 = row.insertCell(1);
+	    var cell3 = row.insertCell(2);
+	    var cell4 = row.insertCell(3);
+	    var cell5 = row.insertCell(4);
+	    var cell6 = row.insertCell(5);
+
+
+	    cell1.innerHTML = 'D.N.I';
+	    cell2.innerHTML = $('#documento').val();
+	    cell3.innerHTML = data[i].fields.nombres+'  '+data[i].fields.apepaterno+'  '+data[i].fields.apematerno;
+		cell4.innerHTML = calcularEdad(data[i].fields.fecha_nacimiento);
+
+	    if(existe==1){
+			if(data.length==1){
+				cell5.innerHTML = '<span><a class="btn btn-success btn-sm text-white" href="/configuracion/crear_cliente?documento='+docu+'">Crear Historia</a></span>'+' ' +'<span><a class="btn btn-primary btn-sm text-white" href="/rayosx/crear_atencion?cliente_id='+data[i].pk+'">Orden</a></span>'
+			}else{
+				cell5.innerHTML = '<span><button onclick="enviar_datos_cliente()" class="btn btn-primary btn-sm text-white" h>Fusionar Historia</button></span>'
+			}
+		}else if(existe==3){
+			if(data.length==1){
+
+				cell5.innerHTML = 'RESERVAR'
+
+				cell6.innerHTML = '<span><a onclick="dar_cita()" class="btn btn-primary btn-sm text-white">Dar Cita</button></a>'
+
+
+			}else{
+				cell5.innerHTML = '<span><button onclick="enviar_datos_cliente()" class="btn btn-primary btn-sm text-white" h>Fusionar Historia</button></span>'
+			}
+		}
+	    else{
+			if(data.length==1){
+	    		cell5.innerHTML = '<span><a class="btn btn-success btn-sm text-white" href="/configuracion/actualizar_cliente/'+data[i].pk+'">Actualizar Historia</a></span>'+' ' +'<span><a class="btn btn-primary btn-sm text-white" href="/rayosx/crear_atencion?cliente_id='+data[i].pk+'" >Orden</a></span>'
+			}else{
+				cell5.innerHTML = '<span><button onclick="enviar_datos_cliente()" class="btn btn-primary btn-sm text-white" h>Fusionar Historia</button></span>'
+			}
+		}
+	}
+}
+
+
+/*  FUNCION NUEVA PARA CARGAR PERSONAL MEDICO EN CITAS */
+
+function personal_list(){
+
+	id_centrocosto=document.getElementById("id_centrocosto").value;
+	url='http://127.0.0.1:8000/cita/api/personal_list/'+id_centrocosto
+	$.ajax({
+
+		url:url,
+ 		type:'GET',
+ 		success:function(data){
+ 			
+ 			limpiar_select(document.getElementById("id_medico"));
+ 			combo = $('#id_medico');
+ 			for(i=0;i<data.length;i++){
+
+ 				combo.append('<option value='+data[i].id_medico+'>'+data[i].medico+'</option>');
+
+ 			}
+ 		}, error:function(){
+
+ 			limpiar_select(document.getElementById("id_medico"));
+ 		}
+
+
+
+
+	});
+
+}
+
+
+function limpiar_select(selectbox){
+	var i;
+    for(i = selectbox.options.length - 1 ; i >= 0 ; i--)
+    {
+        selectbox.remove(i);
+    }
+}
+
+function cupos(){
+
+	id_medico=document.getElementById('id_medico').value;
+	id_centrocosto=document.getElementById("id_centrocosto").value;
+	url='http://127.0.0.1:8000/cita/api/disponiblecupos/'+id_medico+'/centrocosto/'+id_centrocosto
+	$.ajax({
+
+		url:url,
+		type:'GET',
+
+		success:function(data){
+
+			DetalleRolMedico_list(data)
+			div=document.getElementById("calendar")
+			new_div=document.getElementById("calendario")
+			if (div.style.display =='block'){
+
+				div.style.display ='none'
+
+				
+			}
+			if(new_div.style.display =='none'){
+
+				new_div.style.display ='block'
+
+			
+			$('#calendario').fullCalendar({
+				lang: 'es'
+		        header: {
+		            left: 'prev,next',
+		            center: 'title',
+		           
+		        },
+		        defaultDate: '2019-12-01',
+		        defaultView: 'agendaWeek',
+		        buttonIcons: true,
+		        weekNumbers: false,
+		        editable: false,
+		        eventLimit: true,
+	
+		       	minTime:"08:15:00",
+		       	maxTime:"22:15:00",
+		       	slotDuration: '00:15:00',
+  				slotLabelInterval : '00:15:00',
+  				events:'http://127.0.0.1:8000/cita/api/disponiblecupos/'+id_medico+'/centrocosto/'+id_centrocosto,
+  			
+		        // events:'http://127.0.0.1:8000/cita/api/cupos/'+id_detallerol+'/centrocosto/'+id_centrocosto.value,
+
+		        dayClick: function (date, jsEvent, view) {
+		            // alert('Has hecho click en: '+ date.format());
+
+		            // $("#ModalEventos").modal();
+		            // ups=document.getElementById("id_centrocosto");
+		            // medico=document.getElementById("id_medico");
+		            // document.getElementById("ups").innerHTML=ups.options[ups.selectedIndex].text;
+		            // document.getElementById("medico").innerHTML=medico.options[medico.selectedIndex].text
+		            // document.getElementById("fecha").innerHTML=date.format('Y-MM-DD')
+		            // document.getElementById("hora").innerHTML=date.format('h:mm:ss')
+		            
+
+		        }, 
+		        eventClick: function (event, date, jsEvent, view) {
+		        	  $("#ModalEventos").modal();
+		           	ups=document.getElementById("id_centrocosto");
+		            medico=document.getElementById("id_medico");
+		            document.getElementById("ups").innerHTML=ups.options[ups.selectedIndex].text;
+		            document.getElementById("medico").innerHTML=medico.options[medico.selectedIndex].text
+		            // document.getElementById("fecha").innerHTML=date.format('Y-MM-DD')
+		            // document.getElementById("hora").innerHTML=date.format('h:mm:ss')
+		            document.getElementById("idprogramacion").value=event.id
+
+		           
+		        },  
+		    });
+
+			}
+
+			// $("#calendario").fullCalendar('refresh');
+		}
+
+
+
+
+	});
+
+}
+
+
+
+
+
+// select=document.getElementById("id_medico");
+// select.addEventListener('change', function(){
+//   var calendarEl = document.getElementById('calendario_list');
+
+//   var calendar = new FullCalendar.Calendar(calendarEl, {
+//     plugins: [ 'list' ],
+//     timeZone: 'UTC',
+//     defaultView: 'listWeek',
+//     defaultDate: '2019-10-09',
+
+//     // customize the button names,
+//     // otherwise they'd all just say "list"
+//     views: {
+   
+//       listWeek: { buttonText: 'semana' },
+      
+//     },
+
+//     header: {
+//       left: 'title',
+//       center: '',
+//       right: 'listWeek'
+//     },
+//     events: 'http://127.0.0.1:8000/cita/api/cupos/'+id_detallerol+'/centrocosto/'+id_centrocosto.value,
+//   });
+
+//   calendar.render();
+
+// });
+
+function PersonalRolMedico_list(){
+
+	id_detallerol=document.getElementById('id_medico').value;
+	id_centrocosto=document.getElementById("id_centrocosto");
+	url='http://127.0.0.1:8000/cita/api/detallerolmedico/'+id_detallerol+'/centrocosto/'+id_centrocosto.value;
+	$.ajax({
+
+		url:url,
+		type:'GET',
+
+		success:function(data){
+
+			
+			div=document.getElementById("calendar")
+			new_div=document.getElementById("calendario")
+			if (div.style.display =='block'){
+
+				div.style.display ='none'
+
+				
+			}
+			if(new_div.style.display =='none'){
+
+				new_div.style.display ='block'
+
+			
+			$('#calendario').fullCalendar({
+				locale: 'es',
+		        header: {
+		            left: 'prev,next',
+		            center: 'title',
+		            right: 'agendaWeek'
+		        },
+		        defaultDate: '2019-10-09',
+		        defaultView: 'agendaWeek',
+		        rendering: 'background',
+		        buttonIcons: true,
+		        weekNumbers: false,
+		        editable: false,
+		        eventLimit: true,
+	
+		    //    	minTime:"08:00:00",
+		    //    	maxTime:"22:15:00",
+		    //    	slotDuration: '00:15:00',
+  				// slotLabelInterval : '00:15:00',
+  				events:[
+			    {
+			      title: 'Titulo Evento',
+			      start: '2019-12-01',
+			      end: '2019-12-11',
+			    }
+			    ],
+  			
+		        // events:'http://127.0.0.1:8000/cita/api/cupos/'+id_detallerol+'/centrocosto/'+id_centrocosto.value,
+
+		        dayClick: function (date, jsEvent, view) {
+		            // alert('Has hecho click en: '+ date.format());
+		            $("#ModalEventos").modal();
+		            ups=document.getElementById("id_centrocosto");
+		            medico=document.getElementById("id_medico");
+		            document.getElementById("ups").innerHTML=ups.options[ups.selectedIndex].text;
+		            document.getElementById("medico").innerHTML=medico.options[medico.selectedIndex].text
+		            document.getElementById("fecha").innerHTML=date.format('Y-MM-DD')
+		            document.getElementById("hora").innerHTML=date.format('h:mm:ss')
+		            
+
+		        }, 
+		        eventClick: function (calEvent, jsEvent, view) {
+		            $('#event-title').text(calEvent.title);
+		            $('#event-description').html(calEvent.description);
+		            $('#modal-event').modal();
+		        },  
+		    });
+
+			}
+
+			$("#calendario").fullCalendar('refresh');
+		}
+
+
+
+
+	});
+
+}
+
+
+
+
+
+function DetalleRolMedico_list(){
+
+	idmedico=document.getElementById('id_medico').value;
+	id_centrocosto=document.getElementById("id_centrocosto").value;
+	url='http://127.0.0.1:8000/cita/api/detallerolmedico/'+idmedico+'/centrocosto/'+id_centrocosto;
+	$.ajax({
+
+		url:url,
+		type:'GET',
+
+		success:function(data){
+
+			DiasDisponibles_list(data)
+		}
+
+
+
+
+	});
+
+}
+
+
+function DiasDisponibles_list(data){
+
+	var contenido ='';
+    for (i = 0; i < data.length; i++) {
+    contenido += '<li>';
+    contenido +='<span>'+data[i].fecha_atencion+ ' ' +  '('+ data[i].actividad +')' +'</span>';
+    contenido +='<ul>';
+    contenido += '<span>' + data[i].hora_inicio+'-'+ data[i].hora_fin + '</span>';
+    contenido +='</ul>';
+    contenido += '</li>';
+    
+
+    }
+
+    $('#dias').append(contenido);
+
+}

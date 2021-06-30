@@ -1,0 +1,201 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+    <link href="/static/jquery-ui.multidatespicker.css" rel="stylesheet">
+    <link href="/static/jquery-ui.css" rel="stylesheet">
+    <link href="/static/fullcalendar.min.css" rel='stylesheet' />
+    <link href="/static/fullcalendar.print.min.css" rel='stylesheet' media='print' />
+    <link href="/static/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet" />
+{% block css %}
+
+<link href="/static/fullcalendar.min.css" rel='stylesheet' />
+<link href="/static/fullcalendar.print.min.css" rel='stylesheet' media='print' />
+{% endblock %}
+
+{% block content %}
+<div class="col-md-12 col-lg-12">
+    <form action="#" method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-inverse">
+                    <div class="panel-heading">
+                        <input type="hidden" name="rol" id="id_rol" value="{{rol.id}}">
+                        <input type="hidden" name="datos_rol" id="datos_rol">
+                        <input type="hidden" id="id_personal_rol" name="id_personal_rol">
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                 <h4 class="panel-title">Area : {{rol.area}}</h4>
+                                 <h4 class="panel-title">Año : {{rol.anio}}</h4>
+                            </div>
+                            <div class="col-md-5">
+                                
+                                <h4 class="panel-title">Mes : {{rol.get_mes_display}}</h4>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                      
+                        <div class="form-group row">
+                            <label class="col-md-12">Personal</label>
+
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12">
+
+                              <select id="id_personal" name="personal" class="ui-draggable ui-draggable-handle form-control" size="8"  >
+                                  
+                                 
+                                  <option selected="" value="{{personal.id}}">{{personal}}</option>}
+                                  
+
+                                  
+                              </select>
+                            </div>
+                        </div>
+                        
+
+                        
+                    </div>
+                </div>
+                
+
+
+
+            </div>
+            <div class="col-md-8 col-lg-8">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-inverse">
+                            <div class="panel-heading">
+                                <div class="form-group row">
+                                    <div class="col-md-10">
+                                         <h4 class="panel-title" id="name_personal"></h4>
+                                    </div>
+                                    
+                                    
+                                   
+                                </div>
+                               
+                               
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group row">
+                                    <div class="col-md-7">
+                                         <div class="calendar"></div>
+                                    </div>
+                                    <div class="col-md-5">
+                                        <div id="calendario_list"></div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+
+<div id="modal-dialog" class="modal fade" role="dialog">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <form action="" method="POST">
+                    <input type="hidden" name="id_personal_permiso" id="id_personal_permiso" value="{{personal.id}}">
+                    <input type="hidden" name="mes_permiso" id="id_mes_permiso" value="{{rol.mes}}">
+                    <input type="hidden" name="anio_permiso" id="id_anio_permiso" value="{{rol.anio}}">
+                    <input type="hidden" name="rol_permiso" id="id_rol_permiso" value="{{rol.id}}">
+                    <input type="hidden" name="fecha_permiso" id="fecha_permiso">
+                    <input type="hidden" name="csrf" id="csrf" value="{{csrf_token}}">
+                    <div class="container-fluid">
+                        <div class="form-group row">
+
+                            <label class="form-label col-md-2">Personal</label>
+                            <div class="col-md-4">{{personal}}</div>
+                            <label class="form-label col-md-2">Area</label>
+                            <div class="col-md-4">{{personal.area}}</div>
+                
+                        </div>
+                      
+                        <div class="form-group row">
+
+                            <label class="form-label col-md-2">Fecha</label>
+                            <div class="col-md-3" id="fecha"></div>
+                            <label class="form-label col-md-2">Motivo</label>
+                            <div class="col-md-5"><textarea class="form-control" id="id_descripcion" name="id_descripcion"></textarea></div>
+                           
+                
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" onclick="enviar_permiso()" class="btn btn-primary">Confirmar</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+                
+
+</div>
+    
+{% endblock content %}
+{% block scripts %}
+<script type='text/javascript' src="{% static "assets/plugins/moment/moment.min.js" %}"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/bootstrap/main.min.js"></script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/list/main.min.js"></script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/locales/es.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.js" ></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/interaction/main.min.js"></script>
+
+
+
+
+<script src="/static/eigen/js/permiso.js"></script>
+
+<!-- <script src="/static/fullcalendar.min.js"></script> -->
+
+<script>
+
+    inicializar_calendar()
+    detallepersonalrol()
+    inicializar_calendarioProgramados()
+    detallepermiso()
+
+
+
+/*
+$("#calendar1").fullCalendar({
+    
+events: events,
+dayClick: function(date, jsEvent, view) {
+
+id_turno=document.getElementById("id_turno");
+console.log(date.format())
+personal=document.getElementById("id_personal");
+
+console.log(personal.value)
+ 
+var temp={id:id_turno , title: id_turno.options[id_turno.selectedIndex].text, start: date.format()};
+
+events.push(temp);
+
+$("#calendar").fullCalendar( "renderEvent", temp, true );
+}
+});*/
+
+
+
+</script>
+{% endblock scripts %}

@@ -1,0 +1,130 @@
+<div id="top-menu" class="top-menu" style="background-color: #9ac61b;color:white">
+    <!-- begin top-menu nav -->
+    <ul class="nav" style="color: white;">
+        
+       
+       {% for foo in datogeneral.usergrupo %}
+             {% if foo.group_id == 3 %}
+              
+           
+                <li class="has-sub">
+                    <a href="javascript:;">
+                        <b class="caret"></b>
+                        <i class="fa fa-cogs"></i>
+                        <span>CONFIGURACION</span>
+                    </a>
+                    <ul class="sub-menu">
+                        
+                        <li><a href="{% url 'maestro:tipo_documento_list' %}">Tipo Documento</a></li>
+                        
+                        <li><a href="{% url 'maestro:cargo_list' %}">Cargo</a></li>
+                        
+                        <li><a href="{% url 'maestro:estado_civil_list' %}">Estado Civil</a></li>
+                        
+                        <li><a href="{% url 'maestro:area_list' %}">Areas</a></li>
+                       
+                      
+                    </ul>
+                </li>
+                {% endif %}
+          
+                 {% if foo.group_id == 2  %}
+           
+                        {% if request.user.is_superuser == True%}
+                            <li class="has-sub">
+                                <a href="javascript:;">
+                                    <b class="caret"></b>
+                                    <i class="fa fa-users"></i>
+                                    <span>RRHH</span>
+                                </a>
+                                <ul class="sub-menu">
+                                    
+                                        <li><a href="{% url 'rrhh:personal_list' %}">Personal</a></li>
+                                  
+                                        
+                                
+                                </ul>
+                            </li>
+                            <li class="has-sub">
+                            <a href="javascript:;">
+                                <b class="caret"></b>
+                                <i class="fa fa-calendar-alt"></i>
+                                <span>CRONOGRAMA</span>
+                            </a>
+                            <ul class="sub-menu">
+                                
+                                    <li><a href="{% url 'rrhh:rol_list' %}">Rol Personal</a></li>
+                              
+                                    <li><a href="{% url 'rrhh:permiso_list' %}">Permisos</a></li>
+                                   
+                                
+                            </ul>
+                        </li>
+
+                    
+                        {% else %}
+              
+                            <li class="has-sub">
+                                <a href="javascript:;">
+                                    <b class="caret"></b>
+                                    <i class="fa fa-calendar-alt"></i>
+                                    <span>CRONOGRAMA</span>
+                                </a>
+                                <ul class="sub-menu">
+                                    
+                                        <li><a href="{% url 'rrhh:rol_list' %}">Rol Personal</a></li>
+                                  
+                                        <li><a href="{% url 'rrhh:permiso_list' %}">Permisos</a></li>
+                                       
+                                    
+                                </ul>
+                            </li>
+                            {% endif %}
+                    {% endif %}
+                    {% if foo.group_id == 1 %}
+                    <li class="has-sub">
+                        <a href="javascript:;">
+                            <b class="caret"></b>
+                            <i class="fa fa-calendar-alt"></i>
+                            <span>ASISTENCIA</span>
+                        </a>
+                        <ul class="sub-menu">
+                            
+                                <li><a href="{% url 'asistencia:asistencia_form' %}">Asistencia</a></li>
+                                <li><a href="{% url 'asistencia:asistencia_list' %}">Reporte Asistencia</a></li>
+                          
+                               
+                               
+                            
+                        </ul>
+                    </li>
+                    {% endif %}
+                     {% if foo.group_id == 4%}
+        <li class="has-sub">
+                    <a href="javascript:;">
+                        <b class="caret"></b>
+                        <i class="fa fa-user-plus"></i>
+                        <span>Usuario</span>
+                    </a>
+                    <ul class="sub-menu">
+                        
+                        <li><a href="{% url 'acceso:usuario_list' %}">Lista Usuario</a></li>
+                        
+                      
+                       
+                      
+                    </ul>
+            </li>
+        {% endif %}
+        {% endfor %}
+       
+        <li class="menu-control menu-control-left">
+            <a href="javascript:;" data-click="prev-menu"><i class="fa fa-angle-left"></i></a>
+        </li>
+        <li class="menu-control menu-control-right">
+            <a href="javascript:;" data-click="next-menu"><i class="fa fa-angle-right"></i></a>
+        </li>
+    </ul>
+
+    <!-- end top-menu nav -->
+</div>

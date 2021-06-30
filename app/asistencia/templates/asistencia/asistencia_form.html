@@ -1,0 +1,253 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block css %}
+<link href="/static/eigen/css/reloj.css" rel="stylesheet">
+<link href="/static/eigen/css/modal.css" rel="stylesheet">
+
+
+   
+{% endblock %}
+
+{% block content %}
+<body onload="startTime()">
+    <div class="col-md-12 col-lg-12" >
+            <div class="panel panel-inverse">
+                <form action="" method="POST">
+                    <input type="hidden" name="foto" id="foto">
+                    <input type="hidden" name="csrf" id="csrf" value="{{csrf_token}}">
+
+                </form>
+               
+                <div class="panel-body">
+                    <div class="form-group row">
+                        <div class="col-md-12">
+                            <div id="clockdate">
+                            <div class="clockdate-wrapper">
+                                <div id="clock"></div>
+                                <div id="date"></div>
+                              </div>
+                            </div>
+
+                        </div>
+                        
+
+                    </div>
+                    <div class="for-group row">
+                        <div class="col-md-6">
+                            <div class="video-wrap">
+                                <video id="video" playsinline autoplay></video>
+                            </div>
+                            
+
+                        </div>
+                        <div class="col-md-6">
+                            <input type="text" onkeyup="verifica_asistencia()" name="numero_documento" id="id_numero_documento" class="form-control" style="height: 150px;font-size: 134px; margin-top:55px;">
+                        </div>
+                       
+                    </div>
+                    
+
+               
+
+                </div>
+            </div>
+
+    </div>
+</body>
+
+
+
+
+
+
+<div id="modal-dialog" class="modal fade" role="dialog">
+
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            
+            <div class="modal-body">
+
+              <div class="container-fluid">
+                <div class="form-group row">
+                 
+                    <div class="col-md-8">
+                        <canvas id="canvas" width="500" height="400"></canvas>
+                    </div>
+                    <div class="col-md-4 ml-auto" >
+                        <strong><p id="asistencia_personal" style="font-size: 20px;"></p></strong>
+                        <strong><p id="hora" style="font-size: 20px;"></p></strong>
+                        <div class="alert alert-success" role="alert">
+                                <h3><p id="message"></p></h3>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12">
+                            <img style="width: 80px; height:90px; margin-right: -90px; "  src="/static/assets/img/check.png">
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="form-group row">
+                    <div class="col-md-12">
+                        hora:
+                    </div>
+
+                </div>
+  
+   
+  </div>
+
+
+
+
+
+
+
+
+
+                <!-- <div class="col-md-12">
+                    <div class="row">
+
+                        <div class="col-md-8 col-lg-8">
+                            <canvas id="canvas" width="500" height="400"></canvas>
+
+                        </div>
+
+                        <div class="col-md-2 col-lg-2">
+                            <div class="form-group row">
+                                <label>PEIL FERNANDO FLORES AGUOLAR</label>
+
+                            </div>
+                        </div>
+
+
+                    </div>
+
+
+                </div> -->
+
+                <!-- <div class="form-group row">
+                    <div class="col-md-6">
+                        <canvas id="canvas" width="500" height="400"></canvas>
+                    </div>
+                    <div class="col-md-6">
+
+                        
+
+                    </div>
+
+                </div> -->
+
+                  
+            </div>                
+        </div>   
+
+    </div>
+
+</div>
+
+
+<div id="modal-dialog_conteo" class="modal">
+  <div class="modal-contenido">
+   
+   <img src="/static/assets/img/conteo.gif" style="width: 50%; opacity: 0.2;">
+  </div>  
+</div>
+
+
+<div id="modal-dialog_message" class="modal fade" role="dialog">
+
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="alert alert-danger" role="alert">
+                   <h2> <p id="id_message"></p></h2>
+            </div>              
+        </div> 
+        <div class="form-group row">
+
+            <div class="col-md-12" >
+                <img  src="/static/assets/img/error.png">
+            </div>
+
+        </div>  
+
+    </div>
+
+</div>
+
+{% endblock content %}
+
+
+
+{% block scripts %}
+
+<script src="/static/eigen/js/reloj.js"></script>
+<script src="/static/eigen/js/asistencia.js"></script>
+
+<script>
+    
+
+
+    function modal(){
+
+        $('#modal-dialog').modal('show'); // abrir
+
+        var canvas = document.getElementById('canvas');
+        var dataURL = canvas.toDataURL('image/jpeg');
+        document.getElementById("foto").value=dataURL
+        console.log(dataURL);
+    }
+
+
+
+    'use strict';
+
+const video = document.getElementById('video');
+const snap = document.getElementById("snap");
+const canvas = document.getElementById('canvas');
+const errorMsgElement = document.querySelector('span#errorMsg');
+
+const constraints = {
+audio: true,
+video: {
+width: 500, height: 400
+}
+};
+
+// Acceso a la webcam
+async function init() {
+try {
+const stream = await navigator.mediaDevices.getUserMedia(constraints);
+handleSuccess(stream);
+} catch (e) {
+errorMsgElement.innerHTML = `navigator.getUserMedia error:${e.toString()}`;
+}
+}
+// Correcto!
+function handleSuccess(stream) {
+window.stream = stream;
+video.srcObject = stream;
+}
+// Load init
+init();
+// Dibuja la imagen
+var context = canvas.getContext('2d');
+
+
+function capturar_foto(){
+    context.drawImage(video, 0, 0, 640, 480);
+    modal()
+}
+// snap.addEventListener("click", function() {
+
+
+// });
+
+
+</script>
+
+{% endblock scripts %}

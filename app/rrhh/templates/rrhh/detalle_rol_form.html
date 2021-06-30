@@ -1,0 +1,169 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+    <link href="/static/jquery-ui.multidatespicker.css" rel="stylesheet">
+    <link href="/static/jquery-ui.css" rel="stylesheet">
+    <link href="/static/fullcalendar.min.css" rel='stylesheet' />
+    <link href="/static/fullcalendar.print.min.css" rel='stylesheet' media='print' />
+    <link href="/static/assets/plugins/select2/dist/css/select2.min.css" rel="stylesheet" />
+{% block css %}
+
+<link href="/static/fullcalendar.min.css" rel='stylesheet' />
+<link href="/static/fullcalendar.print.min.css" rel='stylesheet' media='print' />
+{% endblock %}
+
+{% block content %}
+<div class="col-md-12 col-lg-12">
+    <form action="{% url 'rrhh:detalle_rol_form' rol.id %}" method="POST">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-4">
+                <div class="panel panel-inverse">
+                    <div class="panel-heading">
+                        <input type="hidden" name="rol" id="id_rol" value="{{rol.id}}">
+                        <input type="hidden" name="datos_rol" id="datos_rol">
+                        <input type="hidden" id="id_personal_rol" name="id_personal_rol">
+                        <div class="form-group row">
+                            <div class="col-md-6">
+                                 <h4 class="panel-title">Area : {{rol.area}}</h4>
+                                 <h4 class="panel-title">Año : {{rol.anio}}</h4>
+                            </div>
+                            <div class="col-md-5">
+                                
+                                <h4 class="panel-title">Mes : {{rol.get_mes_display}}</h4>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <div class="form-group row">
+                            <label class="col-md-12">Turno</label>
+
+                        </div>
+                        <div class="form-group row">
+                           <div class="col-md-12">
+                            <select class="form-control" id="id_turno" name="turno">
+                                    
+                                {% for t in turno %}
+                                <option value="{{t.id}}">{{t.descripcion}}({{t.hora_inicio}}-{{t.hora_fin}})</option>
+
+                                {% endfor %}
+
+                            </select>
+                           </div>
+
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-12">Personal</label>
+
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-md-12">
+
+                              <select id="id_personal" name="personal" class="ui-draggable ui-draggable-handle form-control" size="8" onclick="detallepersonalrol()">
+                                  
+                                  {% for p in personal %}
+                                  <option value="{{p.id}}">{{p}}</option>}
+                                  
+
+                                  {% endfor %}
+                              </select>
+                            </div>
+                        </div>
+                        
+
+                        
+                    </div>
+                </div>
+                
+
+
+
+            </div>
+            <div class="col-md-8 col-lg-8">
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="panel panel-inverse">
+                            <div class="panel-heading">
+                                <div class="form-group row">
+                                    <div class="col-md-10">
+                                         <h4 class="panel-title" id="name_personal"></h4>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" onclick="guardar_datos_rol()" class="btn btn-xs btn-success" style="margin-top: 5px;">Guardar</button>
+                                    </div>
+                                    
+                                   
+                                </div>
+                               
+                               
+                            </div>
+                            <div class="panel-body">
+                                <div class="form-group row">
+                                    <div class="col-md-12">
+                                         <div id="calendar"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+
+<div id="modal-dialog" class="modal fade" role="dialog">
+
+</div>
+    
+{% endblock content %}
+{% block scripts %}
+<script type='text/javascript' src="{% static "assets/plugins/moment/moment.min.js" %}"></script>
+ <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/main.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/bootstrap/main.min.js"></script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/list/main.min.js"></script>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/core/locales/es.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/daygrid/main.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/timegrid/main.min.js" ></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/4.2.0/interaction/main.min.js"></script>
+
+
+<script src="/static/cronograma.js"></script>
+
+<!-- <script src="/static/fullcalendar.min.js"></script> -->
+
+<script>
+
+    inicializar_calendar()
+
+
+/*
+$("#calendar1").fullCalendar({
+    
+events: events,
+dayClick: function(date, jsEvent, view) {
+
+id_turno=document.getElementById("id_turno");
+console.log(date.format())
+personal=document.getElementById("id_personal");
+
+console.log(personal.value)
+ 
+var temp={id:id_turno , title: id_turno.options[id_turno.selectedIndex].text, start: date.format()};
+
+events.push(temp);
+
+$("#calendar").fullCalendar( "renderEvent", temp, true );
+}
+});*/
+
+
+
+</script>
+{% endblock scripts %}

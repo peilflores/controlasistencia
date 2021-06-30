@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block css %}
+
+<link href="{% static "assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" %}" rel="stylesheet" />
+
+<link href="{% static "assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" %}" rel="stylesheet" />
+
+<link href="{% static "assets/plugins/switchery/switchery.css" %}" rel="stylesheet">
+
+<link href="{% static "assets/plugins/select2/dist/css/select2.min.css" %}" rel="stylesheet">
+    
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-12 col-lg-12">
+        
+
+            
+            <div class="panel panel-inverse">
+                <div class="panel-heading">
+                    {% if areas %}
+                     
+                    <form method="POST" action="{% url 'maestro:areas_update' areas.id %}">
+                        <h4 class="panel-title">Actualizar Usuario</h4>
+                    {% else %}
+
+                    <form method="POST" action="{% url 'acceso:usuario_crear' personal.id %}">
+                        <h4 class="panel-title">Crear Usuario</h4>
+
+
+
+                    {% endif %}
+
+                    {% csrf_token %}
+                        <div class="pull-right" style="margin-top: -12px;">
+                            <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+                             
+                        </div>
+
+
+                </div>
+                <div class="panel-body">
+                    <div class="form-group row">
+                        <label class="col-md-2">Personal</label>
+                        <div class="col-md-2">{{personal}}</div>
+                        <label class="col-md-2">Area:</label>
+                        <div class="col-md-2">{{personal.area}}</div>
+                        <div class="col-md-2">Estado</div>
+                        <div class="col-md-2">{{personal.get_estado_display}}</div>
+                       
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-2">Usuario</label>
+                        <div class="col-md-2"><input type="text" name="usuario" value="{{usuario}}" id="id_usuario" class="form-control"></div>
+                        <label class="col-md-2">Contraseña:</label>
+                        <div class="col-md-2"><input type="password" name="password" id="password" class="form-control"></div>
+                        <label class="col-md-2">Grupo</label>
+                        <div class="col-md-2">
+                            <select class="form-control" name="grupo" onchange="permission()" id="id_grupo">
+                                <option>----</option>
+                                {% for g in grupo %}
+                                    <option value="{{g.id}}">{{g.name}}</option>
+                                {% endfor %}
+
+
+                            </select>
+                        </div>
+                       
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-md-2">Permisos</label>
+                        <div class="col-md-10">
+                                <select multiple="multiple" id="id_permiso" name="permiso" class="form-control">
+
+                                    {% for p in permisos %}
+                                        <option value="{{p.permission.id}}">{{p.permission}}</option>
+
+                                    {% endfor %}
+                                    
+
+                                </select>
+                        </div>
+
+                    </div>
+                    
+                   
+
+                       
+                </div>
+            </form>
+            </div>
+       
+    </div>
+
+
+    
+{% endblock content %}
+
+{% block scripts %}
+
+
+
+<script src="{% static 'eigen/js/acceso.js' %}"></script>
+<script src="{% static "assets/plugins/select2/dist/js/select2.min.js" %}"></script>
+<script src="{% static "assets/plugins/switchery/switchery.js" %}"></script>
+<script>
+$('#id_permiso').select2();
+</script>
+{% endblock scripts %}

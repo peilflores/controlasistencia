@@ -1,0 +1,19 @@
+.modal-contenido{
+  background-color:#ffffff00;
+  width: 30%;
+  padding: 2px 2px;
+  margin-left: 10%;
+  margin-top: 20%;
+
+  position: relative;
+}
+.modal{
+  
+  position:fixed;
+  top:0;
+  right:0;
+  bottom:0;
+  left:0;  
+}
+
+

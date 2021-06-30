@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block css %}
+
+
+    
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-12 col-lg-12">
+            <div class="panel panel-inverse">
+                <div class="panel-heading">
+                    {% if personal %}
+                    <form method="POST" action="{% url 'rrhh:personal_update' personal.id %}">
+                    <h4 class="panel-title">Actualizar Personal</h4>
+                    {% else %}
+                    <form method="POST" action="{% url 'rrhh:personal_crear' %}">
+                    <h4 class="panel-title">Crear Personal</h4>
+
+                    {% endif %}
+                    
+                        <div class="pull-right" style="margin-top: -12px;">
+                            <button type="submit" class="btn btn-sm btn-primary">Guardar</button>
+                             
+                        </div>
+                        {% csrf_token %}
+                </div>
+                <div class="panel-body">
+                    <div class="form-group row">
+                        <div class="col-md-1">{{form.nombres.label_tag}}</div>
+                        <div class="col-md-3">{{form.nombres}}</div>
+                        <div class="col-md-1">{{form.apellido_paterno.label_tag}}</div>
+                        <div class="col-md-3">{{form.apellido_paterno}}</div>
+                        <div class="col-md-1">{{form.apellido_materno.label_tag}}</div>
+                        <div class="col-md-3">{{form.apellido_materno}}</div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-1">{{form.tipo_documento.label_tag}}</div>
+                        <div class="col-md-3">{{form.tipo_documento}}</div>
+                        <div class="col-md-1">{{form.numero_documento.label_tag}}</div>
+                        <div class="col-md-3">{{form.numero_documento}}</div>
+                        <div class="col-md-1">{{form.estadocivil.label_tag}}</div>
+                        <div class="col-md-3">{{form.estadocivil}}</div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-1">{{form.fecha_nacimiento.label_tag}}</div>
+                        <div class="col-md-3">{{form.fecha_nacimiento}}</div>
+                        <div class="col-md-1">{{form.cargo.label_tag}}</div>
+                        <div class="col-md-3">{{form.cargo}}</div>
+                        <div class="col-md-1">{{form.telefono.label_tag}}</div>
+                        <div class="col-md-3">{{form.telefono}}</div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-1">{{form.sexo.label_tag}}</div>
+                        <div class="col-md-3">{{form.sexo}}</div>
+                        <div class="col-md-1">{{form.estado.label_tag}}</div>
+                        <div class="col-md-3">{{form.estado}}</div>
+                         <div class="col-md-1">{{form.area.label_tag}}</div>
+                        <div class="col-md-3">{{form.area}}</div>
+                        
+                    </div>
+
+                       
+                </div>
+            </form>
+            </div>
+
+    </div>
+
+
+    
+{% endblock content %}
+
+{% block scripts %}
+
+
+
+{% endblock scripts %}

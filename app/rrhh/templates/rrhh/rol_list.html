@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+
+{% block css %}
+
+<link href="{% static "assets/plugins/DataTables/media/css/dataTables.bootstrap.min.css" %}" rel="stylesheet" />
+
+<link href="{% static "assets/plugins/DataTables/extensions/Responsive/css/responsive.bootstrap.min.css" %}" rel="stylesheet" />
+
+<link href="{% static "assets/plugins/switchery/switchery.css" %}" rel="stylesheet">
+
+<link href="{% static "assets/plugins/select2/dist/css/select2.min.css" %}" rel="stylesheet">
+    
+{% endblock %}
+
+{% block content %}
+    <div class="col-md-12 col-lg-12">
+            <div class="panel panel-inverse">
+                <div class="panel-heading">
+                    
+                        <div class="pull-right">
+                         
+
+                            <a onclick="return abrir_modal('{% url 'rrhh:rol_crear' %}')" class="btn btn btn-primary btn-xs">Crear</a>
+                             
+                        </div>
+                        
+                    
+                    <h4 class="panel-title">Rol Personal</h4>
+
+                </div>
+                <div class="panel-body">
+
+                        <div class="table-responsive">
+                            <table class="table table-condensed table-bordered table-hover dataTables-example" style="width:100%">
+                                <thead>
+                                    <tr>
+
+                                        <th>#</th>
+                                        <th>Area</th>
+                                        <th>Mes</th>
+                                        <th>Año</th>
+                                        <th>Responsable</th>
+                                        <th>Estado</th>
+                                        <th>Accion</th>
+
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                   {% for r in rol %}
+                                   <tr class="gradeX">
+
+                                    <td>{{r.id }}</td>
+                                    <td>{{r.area}}</td>
+                                    <td>{{r.get_mes_display}}</td>
+                                    <td>{{r.anio}}</td>
+                                    <td>{{r.responsable}}</td>
+                                    {% if r.estado == '1' %}
+                                    <td><span class="label label-success">{{r.get_estado_display}}</span></td>
+                                    {% elif r.estado == '2' %}
+                                     <td><span class="label label-warning">{{r.get_estado_display}}</span></td>
+                                    {% endif %}
+                                    <td class="center">
+                                        <a class="btn btn-xs btn-primary" href="{% url 'rrhh:detalle_rol_form' r.id %}" title="Calendario"><i class="far fa-lg fa-calendar-alt" ></i></a>
+                                    </td>
+
+
+                                </tr>
+
+                                {% endfor %}
+
+                            </tbody>
+
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+    </div>
+
+<div id="modal-dialog" class="modal fade" data-keyboard="false" data-backdrop="static" role="dialog">
+
+</div>
+    
+{% endblock content %}
+
+{% block scripts %}
+<script src="{% static "assets/plugins/DataTables/media/js/jquery.dataTables.js" %}"></script>
+<script src="{% static "assets/plugins/DataTables/media/js/dataTables.bootstrap.min.js" %}"></script>
+<script src="{% static "assets/plugins/DataTables/extensions/Responsive/js/dataTables.responsive.min.js" %}"></script>
+
+
+
+<script>
+   $(document).ready(function(){
+    $('.dataTables-example').DataTable();
+      
+    });
+</script>
+{% endblock scripts %}
